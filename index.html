@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        File Share
+    </title>
+</head>
+<body>
+    <h1>File Share</h1>
+    </br>
+    <h1>CORS allowed, can use as external link from anywhere.
+    </br>We will remove your file after 7 days by default.</br>
+    </br>Max file size: 100MB (Cause cloudfront)
+    </h2>
+    <form action="fileupload" method="post" enctype="multipart/form-data">
+    <input type="file" name="filetoupload" style="width: 100%; height: 25%; font-size: 48px;"><br>
+    <button type="submit" style="width: 100%; height: 25%; font-size: 48px;">Submit</button>
+    </form>
+    <input type="text" value="" id="result" style="width: 100%; height: 25%; font-size: 48px;">
+    <button onclick="myFunction()" style="width: 100%; height: 25%; font-size: 48px;">Copy Link</button>
+    <script>
+(function (win, doc) {
+    'use strict';
+    if (!win.XMLHttpRequest || !win.FormData || !win.addEventListener || !doc.querySelectorAll) {
+        // doesn't cut the mustard.
+        return;
+    }
+    function hijaxForm (formElement) {
+        var progressBar;
+        var xhr;
+        function addProgressBar () {
+            progressBar = doc.createElement('progress');
+            progressBar.setAttribute('min', '0');
+            progressBar.setAttribute('max', '100');
+            progressBar.setAttribute('value', '0');
+            formElement.appendChild(progressBar);
+        }
+        function updateProgressBar (ev) {
+            if (ev.lengthComputable) {
+                progressBar.value = (ev.loaded / ev.total) * 100;
+            }
+        }
+        function ajax (elem) {
+            addProgressBar();
+            var method = elem.getAttribute('method');
+            var url = elem.getAttribute('action');
+            var data = new FormData(elem);
+            xhr = new XMLHttpRequest();
+            xhr.open(method, url, true);
+            xhr.onload = function(ev) {
+                doc.getElementById('result').value = JSON.parse(xhr.response).url;
+        progressBar.parentNode.removeChild(progressBar);
+            };
+            xhr.upload.onprogress = function (ev) {
+                updateProgressBar(ev);
+            };
+            xhr.send(data);
+        }
+        formElement.addEventListener('submit', function (ev) {
+            ajax(this);
+            ev.preventDefault();
+        }, false);
+    }
+    var formElements = doc.querySelectorAll('form[method="post"]');
+    for (var i = 0; i < formElements.length; i = i + 1) {
+        hijaxForm(formElements[i]);
+    }
+}(this, this.document));
+
+function myFunction() {
+  /* Get the text field */
+  var copyText = document.getElementById("result");
+
+  /* Select the text field */
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+   /* Copy the text inside the text field */
+  navigator.clipboard.writeText(copyText.value);
+
+  /* Alert the copied text */
+  alert("Copied the text: " + copyText.value);
+}
+
+    </script>
+</body>
+<html>
